@@ -1,12 +1,15 @@
 import io
 import tkinter as tk
+
 import pandas as pd
 from matplotlib import pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.backend_bases import MouseEvent
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 import calc
 import sel_idx
 from folderdata import FolderData
+
 
 class ShowPlot:
     def __init__(

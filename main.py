@@ -1,7 +1,8 @@
 from pathlib import Path
+
 from folderselect import folder_select
-from xlsxout import XlsxOut
 from showplot import ShowPlot
+from xlsxout import XlsxOut
 
 spe_height = 10
 while True:
