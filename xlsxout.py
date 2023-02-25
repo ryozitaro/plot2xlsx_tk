@@ -101,6 +101,37 @@ class XlsxOut:
         chart.set_y_axis({"crossing": "min", "major_gridlines": {"visible": True}})
         return chart
 
+    def _locate_cells(self, series: pd.Series, row: int, col: int) -> pd.Series:
+        trans = {"P": 2, "S": 3}
+        col += 1
+        return pd.Series(
+            xl_rowcol_to_cell(row + trans[series.name], col + i)
+            for i in range(len(series))
+        )
+
+    def _cell_contents(self, cell_idx: pd.DataFrame, border, name, p_num, s_num):
+        match name:
+            case sel_idx.DELTA_T:
+                cols = [sel_idx.OUT_T, sel_idx.IN_T, sel_idx.INI_T]
+                p_fml = calc.delta(*cell_idx.loc["P", cols], formula=True)
+                s_fml = calc.delta(*cell_idx.loc["S", cols], formula=True)
+            case sel_idx.V:
+                cols = [sel_idx.SPE_HEIGHT, sel_idx.DELTA_T]
+                p_fml = calc.v(*cell_idx.loc["P", cols], formula=True)
+                s_fml = calc.v(*cell_idx.loc["S", cols], formula=True)
+            case sel_idx.POISSON:
+                p_fml = s_fml = calc.poisson(*cell_idx[sel_idx.V], formula=True)
+            case _:
+                p_fml = s_fml = None
+
+        if p_fml:
+            p_cell_contents = [p_fml, border, p_num]
+            s_cell_contents = [s_fml, border, s_num]
+        else:
+            p_cell_contents = [p_num, border]
+            s_cell_contents = [s_num, border]
+        return p_cell_contents, s_cell_contents
+
     def _write_sel_df(self, cell: str | tuple[int, int], sel_df: pd.DataFrame) -> None:
         """
         dfを書き込み用の形に直し、書き込まれるセルを特定したDataFrameを作り、
@@ -109,12 +140,14 @@ class XlsxOut:
         row, col = self._cell_judge(cell)
 
         # 書き込みデータの用意
-        data = [((None,) * 2, sel_df.index)] + list(sel_df.items())
+        data = sel_df.reset_index(names="").items()
 
         # 書き込まれるセルの特定
         cell_idx = sel_df.copy()
-        cell_idx.loc["P"] = [xl_rowcol_to_cell(row + 2, col + i) for i in range(1, 8)]
-        cell_idx.loc["S"] = [xl_rowcol_to_cell(row + 3, col + i) for i in range(1, 8)]
+        cell_idx[:] = ""
+        cell_idx = cell_idx.apply(
+            lambda x: self._locate_cells(x, row, col), axis=1, result_type="broadcast"
+        )
 
         # セルのボーダー
         border_btm_empty = self.wb.add_format(
@@ -133,28 +166,11 @@ class XlsxOut:
             else:
                 self.ws.write(row, col, name[0], border_btm_empty)
                 self.ws.write(row + 1, col, name[1], border_top_empty)
+
             # 値書き込み
-            match name:
-                case sel_idx.DELTA_T:
-                    cols = [sel_idx.OUT_T, sel_idx.IN_T, sel_idx.INI_T]
-                    p_fml = calc.delta(*cell_idx.loc["P", cols], formula=True)
-                    s_fml = calc.delta(*cell_idx.loc["S", cols], formula=True)
-                case sel_idx.V:
-                    cols = [sel_idx.SPE_HEIGHT, sel_idx.DELTA_T]
-                    p_fml = calc.v(*cell_idx.loc["P", cols], formula=True)
-                    s_fml = calc.v(*cell_idx.loc["S", cols], formula=True)
-                case sel_idx.POISSON:
-                    p_fml = s_fml = calc.poisson(*cell_idx[sel_idx.V], formula=True)
-                case _:
-                    p_fml = s_fml = None
-
-            if p_fml:
-                p_cell_contents = [p_fml, border, p_num]
-                s_cell_contents = [s_fml, border, s_num]
-            else:
-                p_cell_contents = [p_num, border]
-                s_cell_contents = [s_num, border]
-
+            p_cell_contents, s_cell_contents = self._cell_contents(
+                cell_idx, border, name, p_num, s_num
+            )
             self.ws.write(row + 2, col, *p_cell_contents)
             self.ws.write(row + 3, col, *s_cell_contents)
 

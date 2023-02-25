@@ -18,7 +18,7 @@ class ShowPlot:
         s_ini_t: float,
         spe_height: float,
         p_folder: FolderData,
-        s_folder: FolderData
+        s_folder: FolderData,
     ) -> None:
 
         self.p_folder = p_folder
@@ -37,7 +37,7 @@ class ShowPlot:
             return f"{num} [sec]"
         else:
             for combi in ((1e-3, "m"), (1e-6, "μ"), (1e-9, "n")):
-                if abs_num < combi[0]*1000:
+                if abs_num < combi[0] * 1000:
                     size, prefix = combi
             return f"{num/size:.3f} [{prefix}sec]"
 
@@ -101,7 +101,7 @@ class ShowPlot:
 
                     self.label_poisson["text"] = text_poisson
                     self.sel_df[sel_idx.POISSON] = poisson
-  
+
     def get_all_selected(self) -> bool:
         """
         プロットが全部選択されたか、boolで返します。
@@ -120,21 +120,29 @@ class ShowPlot:
         self.root.state("zoomed")
 
         figure_canvas = FigureCanvasTkAgg(self.fig, self.root).get_tk_widget()
-        figure_canvas.pack(side=tk.LEFT,fill=tk.BOTH,expand=True)
+        figure_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        canvas = tk.Canvas(self.root,highlightthickness=0)
+        canvas = tk.Canvas(self.root, highlightthickness=0)
         canvas.pack(side=tk.RIGHT)
 
-        kw_text=dict(master=canvas, font=("Meiryo", 16), justify=tk.LEFT)
-        kw_pack=dict(padx=30, pady=10, anchor=tk.W)
+        kw_text = dict(master=canvas, font=("Meiryo", 16), justify=tk.LEFT)
+        kw_pack = dict(padx=30, pady=10, anchor=tk.W)
 
-        spe_height = tk.Label(text=f"供試体高さ {self.sel_df[sel_idx.SPE_HEIGHT]['P']:f} [cm]", **kw_text)
+        spe_height = tk.Label(
+            text=f"供試体高さ {self.sel_df[sel_idx.SPE_HEIGHT]['P']:f} [cm]", **kw_text
+        )
         spe_height.pack(**kw_pack)
 
-        self.label_p_wave = tk.Label(text=f"p ini t: {self._unit_conv(self.sel_df[sel_idx.INI_T]['P'])}", **kw_text)
+        self.label_p_wave = tk.Label(
+            text=f"p ini t: {self._unit_conv(self.sel_df[sel_idx.INI_T]['P'])}",
+            **kw_text,
+        )
         self.label_p_wave.pack(**kw_pack)
 
-        self.label_s_wave = tk.Label(text=f"p ini t: {self._unit_conv(self.sel_df[sel_idx.INI_T]['S'])}", **kw_text)
+        self.label_s_wave = tk.Label(
+            text=f"p ini t: {self._unit_conv(self.sel_df[sel_idx.INI_T]['S'])}",
+            **kw_text,
+        )
         self.label_s_wave.pack(**kw_pack)
 
         self.label_poisson = tk.Label(**kw_text)
@@ -147,7 +155,7 @@ class ShowPlot:
         self.fig.canvas.mpl_connect("button_press_event", self.mouse_click)
         self.root.protocol("WM_DELETE_WINDOW", self.window_delete)
         self.root.mainloop()
-    
+
     def window_delete(self) -> None:
         """
         画面を閉じた際に再選択するか尋ねるメソッド
@@ -169,7 +177,7 @@ class ShowPlot:
         プロットを選択した結果のデータをDataFrameで返します。
         """
         return self.sel_df
-    
+
     def out_image(self):
         """
         サイズが1920*1080のプロット画像が入ったBytesIOを取得します。

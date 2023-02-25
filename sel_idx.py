@@ -8,17 +8,18 @@ DELTA_T = ("Δt", "[s]")
 V = ("V", "[m/s]")
 POISSON = ("ポアソン比", "")
 
+
 def create_df():
     sel_df = pd.DataFrame(
-            data={
-                SPE_HEIGHT: float("nan"),
-                IN_T: float("nan"),
-                OUT_T: float("nan"),
-                INI_T: float("nan"),
-                DELTA_T: float("nan"),
-                V: float("nan"),
-                POISSON: float("nan"),
-            },
-            index=("P", "S")
-        )
+        data={
+            SPE_HEIGHT: float("nan"),
+            IN_T: float("nan"),
+            OUT_T: float("nan"),
+            INI_T: float("nan"),
+            DELTA_T: float("nan"),
+            V: float("nan"),
+            POISSON: float("nan"),
+        },
+        index=("P", "S"),
+    )
     return sel_df
