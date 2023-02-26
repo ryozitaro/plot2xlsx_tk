@@ -178,7 +178,7 @@ class ShowPlot:
         """
         return self.sel_df
 
-    def out_image(self):
+    def out_image(self) -> io.BytesIO:
         """
         サイズが1920*1080のプロット画像が入ったBytesIOを取得します。
         """

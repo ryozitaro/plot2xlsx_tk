@@ -9,7 +9,7 @@ V = ("V", "[m/s]")
 POISSON = ("ポアソン比", "")
 
 
-def create_df():
+def create_df() -> pd.DataFrame:
     sel_df = pd.DataFrame(
         data={
             SPE_HEIGHT: float("nan"),

@@ -3,10 +3,13 @@ import io
 import pandas as pd
 import xlsxwriter as xw
 from xlsxwriter.utility import xl_cell_to_rowcol, xl_rowcol_to_cell
+from xlsxwriter.chart_scatter import ChartScatter
 
 import calc
 import sel_idx
 from folderdata import FolderData
+
+SEL_DF_ROW_NUM = {"P": 2, "S": 3}
 
 
 class XlsxOut:
@@ -23,7 +26,7 @@ class XlsxOut:
     def __exit__(self, ex_type, ex_value, traceback):
         self.close()
 
-    def get_xlsx(self):
+    def get_xlsx(self) -> bytes:
         """
         closeしたあと、このメソッドでxlsxのbytesが取得できます。
         """
@@ -61,7 +64,9 @@ class XlsxOut:
             col += 1
             self.ws.write_column(row, col, [i[0], *i[1]])
 
-    def _create_chart(self, cell: str | tuple[int, int], data_length: int):
+    def _create_chart(
+        self, cell: str | tuple[int, int], data_length: int
+    ) -> ChartScatter:
         """
         チャートオブジェクトを作成します。
         """
@@ -102,14 +107,15 @@ class XlsxOut:
         return chart
 
     def _locate_cells(self, series: pd.Series, row: int, col: int) -> pd.Series:
-        trans = {"P": 2, "S": 3}
         col += 1
         return pd.Series(
-            xl_rowcol_to_cell(row + trans[series.name], col + i)
+            xl_rowcol_to_cell(row + SEL_DF_ROW_NUM[series.name], col + i)
             for i in range(len(series))
         )
 
-    def _cell_contents(self, cell_idx: pd.DataFrame, border, name, p_num, s_num):
+    def _cell_contents(
+        self, cell_idx: pd.DataFrame, border, name, p_num, s_num
+    ) -> tuple[list, list]:
         match name:
             case sel_idx.DELTA_T:
                 cols = [sel_idx.OUT_T, sel_idx.IN_T, sel_idx.INI_T]
