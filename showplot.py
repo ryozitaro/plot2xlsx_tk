@@ -20,7 +20,6 @@ class ShowPlot:
         p_folder: FolderData,
         s_folder: FolderData,
     ) -> None:
-
         self.p_folder = p_folder
         self.s_folder = s_folder
 
@@ -81,8 +80,8 @@ class ShowPlot:
             if vline_in.get_visible() and vline_out.get_visible():
                 label["text"] = (
                     f"{p_or_s} ini t: {self._unit_conv(ini_t := self.sel_df.at[p_or_s, sel_idx.INI_T])}\n"
-                    f"{p_or_s} in t: {self._unit_conv(in_t := vline_in.get_xdata())}\n"
-                    f"{p_or_s} out t: {self._unit_conv(out_t := vline_out.get_xdata())}\n"
+                    f"{p_or_s} in t: {self._unit_conv(in_t := vline_in.get_xdata()[0])}\n"
+                    f"{p_or_s} out t: {self._unit_conv(out_t := vline_out.get_xdata()[0])}\n"
                     f"{p_or_s} Δt: {self._unit_conv(delta_t := calc.delta(out_t, in_t, ini_t))}\n"
                     f"{p_or_s} V: {(v := calc.v(self.sel_df.at[p_or_s, sel_idx.SPE_HEIGHT], delta_t)):.3f}[m/s]"
                 )
